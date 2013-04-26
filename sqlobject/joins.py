@@ -285,18 +285,31 @@ class SOSQLRelatedJoin(SORelatedJoin):
             conn = inst._connection
         else:
             conn = None
-        results = self.otherClass.select(sqlbuilder.AND(
-            OtherTableToJoin(
-                self.otherClass.sqlmeta.table, self.otherClass.sqlmeta.idName,
-                self.intermediateTable, self.otherColumn
-            ),
-            JoinToTable(
-                self.soClass.sqlmeta.table, self.soClass.sqlmeta.idName,
-                self.intermediateTable, self.joinColumn
-            ),
-            TableToId(self.soClass.sqlmeta.table, self.soClass.sqlmeta.idName, inst.id),
-        ), clauseTables=(self.soClass.sqlmeta.table, self.otherClass.sqlmeta.table, self.intermediateTable),
-        connection=conn)
+        if self.soClass.sqlmeta.table != self.otherClass.sqlmeta.table:
+            results = self.otherClass.select(sqlbuilder.AND(
+                OtherTableToJoin(
+                    self.otherClass.sqlmeta.table, self.otherClass.sqlmeta.idName,
+                    self.intermediateTable, self.otherColumn
+                ),
+                JoinToTable(
+                    self.soClass.sqlmeta.table, self.soClass.sqlmeta.idName,
+                    self.intermediateTable, self.joinColumn
+                ),
+                TableToId(self.soClass.sqlmeta.table, self.soClass.sqlmeta.idName, inst.id),
+            ), clauseTables=(self.soClass.sqlmeta.table, self.otherClass.sqlmeta.table, self.intermediateTable),
+            connection=conn)
+        else:
+            results = self.otherClass.select(sqlbuilder.AND(
+                OtherTableToJoin(
+                    self.otherClass.sqlmeta.table, self.otherClass.sqlmeta.idName,
+                    self.intermediateTable, self.otherColumn
+                ),
+                JoinToTable(
+                    self.soClass.sqlmeta.table, self.soClass.sqlmeta.idName,
+                    self.intermediateTable, self.joinColumn
+                ),
+            ), clauseTables=(self.soClass.sqlmeta.table, self.otherClass.sqlmeta.table, self.intermediateTable),
+            connection=conn)
         return results.orderBy(self.orderBy)
 
 class SQLRelatedJoin(RelatedJoin):
